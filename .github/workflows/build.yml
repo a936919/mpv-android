@@ -5,6 +5,7 @@ on:
   push:
     branches:
       - fongmi
+      - codex/libxml2-dash-build
   pull_request:
     branches:
       - fongmi
@@ -52,6 +53,21 @@ jobs:
           MPV_ANDROID_NATIVE_ONLY: "1"
         run: |
           buildscripts/include/ci.sh build
+
+      - name: Verify libxml2 and native DASH support
+        run: |
+          set -euo pipefail
+          for arch in armv7l arm64; do
+            strings "buildscripts/prefix/$arch/lib/libavformat.so" | grep -F -- '--enable-libxml2'
+            strings "buildscripts/prefix/$arch/lib/libavformat.so" | grep -Fx 'Dynamic Adaptive Streaming over HTTP'
+          done
+          for abi in armeabi-v7a arm64-v8a; do
+            test -s "app/src/main/libs/$abi/libmpv.so"
+            if strings "app/src/main/libs/$abi/libmpv.so" | grep -F 'configured without libxml2'; then
+              echo "libmpv for $abi still reports configured without libxml2" >&2
+              exit 1
+            fi
+          done
 
       - uses: actions/upload-artifact@v7
         with:

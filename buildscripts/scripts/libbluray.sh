@@ -24,7 +24,7 @@ meson setup $build --cross-file "$prefix_dir"/crossfile.txt \
 	-Dembed_udfread=false \
 	-Dfontconfig=disabled \
 	-Dfreetype=disabled \
-	-Dlibxml2=disabled
+	-Dlibxml2=enabled
 
 ninja -C $build -j$cores
 DESTDIR="$prefix_dir" ninja -C $build install
